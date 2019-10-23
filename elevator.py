@@ -1,11 +1,6 @@
 from collections import namedtuple
 
-
-import bisect
-
-
 Call = namedtuple("Call", "floor type direction")
-
 
 class StrategyChoice:
 
@@ -141,21 +136,39 @@ class Plateform:
             elv.next_action()
 
 
+def getInput(max_floor, min_floor, type_call):
+    try:
+        a = input("Ask for an elevator from floor number: ")
+        if a != "pass":
+            a = int(a)
+            if a == max_floor:
+                direction = "DOWN"
+            elif a == min_floor:
+                direction = "UP"
+            elif a < max_floor and a > min_floor:
+                direction = input("Indicate direction : ")
+                if direction != "UP" and direction != "DOWN":
+                    raise ValueError("direction must be {} or {}".format("UP", "DOWN"))
+            else:
+                raise ValueError("number of floor not between {} and  {}".format(min_floor, max_floor))
+        else:
+            return None
+    except Exception as e:
+        print('wrong entry {}'.format(str(e)))
+        print('-' * 20)
+        return None
+    else:
+        return Call(a, type_call, direction)
+
 if __name__ == "__main__":
 
     p = Plateform(4, 2, 0, 3)
-    type_call = "E"
     while True:
-        try:
-            a = int(input("Ask for an elevator from : "))
-            direction = input("Indicate direction : ")
-            c = Call(a, type_call, direction)
+        c = getInput(p.max_floor, p.min_floor, type_call="E")
+        if c:
             p.receive_call(c)
-            print('-' * 20)
-        except Exception as e:
-            print('wrong entry {}'.format(str(e)))
-            print('-' * 20)
-        p.next()
+        else:
+            p.next()
         print('-' * 20)
 
 
