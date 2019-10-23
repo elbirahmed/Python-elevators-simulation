@@ -18,6 +18,7 @@ class StrategyChoiceFree(StrategyChoice):
                 return elv
         return None
 
+
 class StrategyChoiceNearest(StrategyChoice):
 
     def op_choice(self, elevators, call=None):
@@ -35,10 +36,9 @@ class StrategyChoiceNearest(StrategyChoice):
         return elv
 
 
-
 class Elevator:
 
-    def __init__(self, max_floor, min_floor , id, max_call=2):
+    def __init__(self, max_floor, min_floor, id, max_call=2):
         self.current_floor = 0
         self.min_floor = min_floor
         self.max_floor = max_floor
@@ -66,7 +66,6 @@ class Elevator:
         self.current_floor = dest
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
 
-
     def __open_door(self):
         self.status = "STOP"
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
@@ -78,7 +77,6 @@ class Elevator:
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
         print("Elevator {}: status -> {}".format(self.id, self.status))
         print("Elevator {}: close door ".format(self.id))
-
 
     def next_action(self):
         if len(self.to_visit) > 0:
@@ -106,14 +104,14 @@ class Elevator:
                 self.__move_down()
                 return True
 
-
     def receive_call(self, call):
         print("Elevator {}: gets the call-> {}, {} ".format(self.id, call.floor, call.type))
         self.to_visit.append(call)
 
+
 class Plateform:
 
-    def __init__(self, nb_floor, nb_elevator, min_floor, max_floor, choice_strategy = StrategyChoiceNearest()):
+    def __init__(self, nb_floor, nb_elevator, min_floor, max_floor, choice_strategy=StrategyChoiceNearest()):
         self.nb_floor = nb_floor
         self.nb_elevator = nb_elevator
         self.min_floor = min_floor
@@ -129,9 +127,6 @@ class Plateform:
     def next(self):
         for elv in self.elevators:
             elv.next_action()
-
-
-
 
 
 p =Plateform(4, 2, 0, 3)
