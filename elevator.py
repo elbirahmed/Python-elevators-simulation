@@ -1,7 +1,10 @@
 from collections import namedtuple
-from random import randint
 
-Call = namedtuple("Call", "floor type")
+
+import bisect
+
+
+Call = namedtuple("Call", "floor type direction")
 
 
 class StrategyChoice:
@@ -24,12 +27,16 @@ class StrategyChoiceNearest(StrategyChoice):
     def op_choice(self, elevators, call=None):
         free_elvs = [elv for elv in elevators if len(elv.to_visit) < elv.max_call]
         elv = None
-        if len(free_elvs) > 0:
+        if free_elvs:
             elv = free_elvs[0]
             free_elvs_near = list(map(lambda x: (x, x.current_floor - call.floor), free_elvs))
             m = abs(min(free_elvs_near, key=lambda x: abs(x[1]))[1])
             free_elvs_near = list(filter(lambda x: abs(x[1]) == m, free_elvs_near))
-            free_elvs_near = list(filter(lambda x: x[0].status in ('STOP', 'DOWN') if x[1] < 0 else ('UP', 'STOP') , free_elvs_near))
+
+            def filtre(x):
+                return (x[0].direction == 'DOWN' and x[1] >= 0) or (x[0].direction == 'UP')
+
+            free_elvs_near = list(filter(filtre, free_elvs_near))
             free_elvs_near = list(map(lambda x: x[0], free_elvs_near))
             if len(free_elvs_near) > 0:
                 elv = free_elvs_near[0]
@@ -50,18 +57,20 @@ class Elevator:
 
     def __move_up(self):
         dest = self.current_floor + 1
-        self.status = "UP"
+        self.direction = "UP"
+        self.status = "MOVE"
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}".format(self.id, self.status))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
         print("Moving from {} to {}".format(self.current_floor, dest))
         self.current_floor = dest
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
 
     def __move_down(self):
         dest = self.current_floor - 1
-        self.status = "DOWN"
+        self.direction = "DOWN"
+        self.status = "MOVE"
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}".format(self.id, self.status))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
         print("moving from {} to {}".format(self.current_floor, dest))
         self.current_floor = dest
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
@@ -69,13 +78,13 @@ class Elevator:
     def __open_door(self):
         self.status = "STOP"
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}".format(self.id, self.status))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
         print("Elevator {}: open door ".format(self.id))
 
     def __close_door(self):
         self.status = "STOP"
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}".format(self.id, self.status))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
         print("Elevator {}: close door ".format(self.id))
 
     def next_action(self):
@@ -91,18 +100,22 @@ class Elevator:
                     try:
                         type = "D"
                         a = int(input("Enter Call D to: "))
-                        if a != "":
-                            c = Call(a, type)
-                            p.receive_call(c)
+                        direction = input("Indicate direction : ")
+                        c = Call(a, type, direction)
+                        p.receive_call(c)
                     except Exception as e:
                         print('wrong entry {}'.format(str(e)))
                 self.to_visit.pop(0)
                 self.__close_door()
-            return True
         else:
             if self.current_floor != 0:
                 self.__move_down()
-                return True
+            if self.current_floor == 0:
+                self.status = "STOP"
+                self.direction = "UP"
+                print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
+                print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
+
 
     def receive_call(self, call):
         print("Elevator {}: gets the call-> {}, {} ".format(self.id, call.floor, call.type))
@@ -129,20 +142,22 @@ class Plateform:
             elv.next_action()
 
 
-p =Plateform(4, 2, 0, 3)
-type = "E"
-while True:
-    try:
-        a = int(input("Ask for an elevator from : "))
-        if a != "":
-            c = Call(a, type)
+if __name__ == "__main__":
+
+    p = Plateform(4, 2, 0, 3)
+    type_call = "E"
+    while True:
+        try:
+            a = int(input("Ask for an elevator from : "))
+            direction = input("Indicate direction : ")
+            c = Call(a, type_call, direction)
             p.receive_call(c)
             print('-' * 20)
-    except Exception as e:
-        print('wrong entry {}'.format(str(e)))
+        except Exception as e:
+            print('wrong entry {}'.format(str(e)))
+            print('-' * 20)
+        p.next()
         print('-' * 20)
-    p.next()
-    print('-' * 20)
 
 
 9
