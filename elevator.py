@@ -30,13 +30,11 @@ class StrategyChoiceNearest(StrategyChoice):
         if free_elvs:
             elv = free_elvs[0]
             free_elvs_near = list(map(lambda x: (x, x.current_floor - call.floor), free_elvs))
+            def filtre(x):
+                return x[0].direction == call.direction or x[0].status == "HOLD"
+            free_elvs_near = list(filter(filtre, free_elvs_near))
             m = abs(min(free_elvs_near, key=lambda x: abs(x[1]))[1])
             free_elvs_near = list(filter(lambda x: abs(x[1]) == m, free_elvs_near))
-
-            def filtre(x):
-                return (x[0].direction == 'DOWN' and x[1] >= 0) or (x[0].direction == 'UP')
-
-            free_elvs_near = list(filter(filtre, free_elvs_near))
             free_elvs_near = list(map(lambda x: x[0], free_elvs_near))
             if len(free_elvs_near) > 0:
                 elv = free_elvs_near[0]
@@ -50,7 +48,7 @@ class Elevator:
         self.min_floor = min_floor
         self.max_floor = max_floor
         self.to_visit = []
-        self.status = "STOP"
+        self.status = "HOLD"
         self.id = id
         self.max_call = max_call
         self.direction = "UP"
@@ -102,7 +100,7 @@ class Elevator:
                         a = int(input("Enter Call D to: "))
                         direction = input("Indicate direction : ")
                         c = Call(a, type, direction)
-                        p.receive_call(c)
+                        self.receive_call(c)
                     except Exception as e:
                         print('wrong entry {}'.format(str(e)))
                 self.to_visit.pop(0)
@@ -111,7 +109,7 @@ class Elevator:
             if self.current_floor != 0:
                 self.__move_down()
             if self.current_floor == 0:
-                self.status = "STOP"
+                self.status = "HOLD"
                 self.direction = "UP"
                 print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
                 print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
@@ -120,6 +118,7 @@ class Elevator:
     def receive_call(self, call):
         print("Elevator {}: gets the call-> {}, {} ".format(self.id, call.floor, call.type))
         self.to_visit.append(call)
+        self.to_visit.sort(key=lambda x: x[0])
 
 
 class Plateform:
