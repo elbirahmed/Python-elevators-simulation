@@ -90,14 +90,8 @@ class Elevator:
             else:
                 self.__open_door()
                 if call.type == "E":
-                    try:
-                        type = "D"
-                        a = int(input("Enter Call D to: "))
-                        direction = input("Indicate direction : ")
-                        c = Call(a, type, direction)
-                        self.receive_call(c)
-                    except Exception as e:
-                        print('wrong entry {}'.format(str(e)))
+                    c = self.__getInputForCallD()
+                    self.receive_call(c)
                 self.to_visit.pop(0)
                 self.__close_door()
         else:
@@ -114,6 +108,26 @@ class Elevator:
         print("Elevator {}: gets the call-> {}, {} ".format(self.id, call.floor, call.type))
         self.to_visit.append(call)
         self.to_visit.sort(key=lambda x: x[0])
+
+
+    def __getInputForCallD(self):
+        a = input("You go to floor : ")
+        try:
+            a = int(a)
+            if a < self.max_floor and a > self.min_floor:
+                cond1 = self.direction == "UP" and a <= self.current_floor
+                cond2 = self.direction == "DOWN" and a >= self.current_floor
+                if cond1 or cond2:
+                    message = "Elevator going  {}  from {} and do not serve floor {}"
+                    raise ValueError(message.format(self.direction, self.current_floor, a))
+            else:
+                raise ValueError("number of floor not between {} and  {}".format(self.min_floor, self.max_floor))
+        except Exception as e:
+            print('wrong entry {}'.format(str(e)))
+            print('-' * 20)
+            return None
+        else:
+            return Call(a, "D", self.direction)
 
 
 class Plateform:
@@ -135,36 +149,39 @@ class Plateform:
         for elv in self.elevators:
             elv.next_action()
 
-
-def getInput(max_floor, min_floor, type_call):
-    try:
-        a = input("Ask for an elevator from floor number: ")
-        if a != "pass":
-            a = int(a)
-            if a == max_floor:
-                direction = "DOWN"
-            elif a == min_floor:
-                direction = "UP"
-            elif a < max_floor and a > min_floor:
-                direction = input("Indicate direction : ")
-                if direction != "UP" and direction != "DOWN":
-                    raise ValueError("direction must be {} or {}".format("UP", "DOWN"))
+    @staticmethod
+    def getInputForCallE(max_floor, min_floor):
+        try:
+            a = input("Ask for an elevator from floor number: ")
+            if a != "pass":
+                a = int(a)
+                if a == max_floor:
+                    direction = "DOWN"
+                elif a == min_floor:
+                    direction = "UP"
+                elif a < max_floor and a > min_floor:
+                    direction = input("Indicate direction : ")
+                    if direction != "UP" and direction != "DOWN":
+                        raise ValueError("direction must be {} or {}".format("UP", "DOWN"))
+                else:
+                    raise ValueError("number of floor not between {} and  {}".format(min_floor, max_floor))
             else:
-                raise ValueError("number of floor not between {} and  {}".format(min_floor, max_floor))
-        else:
+                return None
+        except Exception as e:
+            print('wrong entry {}'.format(str(e)))
+            print('-' * 20)
             return None
-    except Exception as e:
-        print('wrong entry {}'.format(str(e)))
-        print('-' * 20)
-        return None
-    else:
-        return Call(a, type_call, direction)
+        else:
+            return Call(a, "E", direction)
+
+
+
 
 if __name__ == "__main__":
 
     p = Plateform(4, 2, 0, 3)
     while True:
-        c = getInput(p.max_floor, p.min_floor, type_call="E")
+        c = Plateform.getInputForCallE(p.max_floor, p.min_floor)
         if c:
             p.receive_call(c)
         else:
