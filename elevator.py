@@ -56,6 +56,8 @@ class Elevator:
         print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
         print("Moving from {} to {}".format(self.current_floor, dest))
         self.current_floor = dest
+        if dest == self.max_floor:
+            self.direction = "DOWN"
         print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
 
     def __move_down(self):
@@ -91,7 +93,8 @@ class Elevator:
                 self.__open_door()
                 if call.type == "E":
                     c = self.__getInputForCallD()
-                    self.receive_call(c)
+                    if c:
+                        self.receive_call(c)
                 self.to_visit.pop(0)
                 self.__close_door()
         else:
@@ -107,28 +110,31 @@ class Elevator:
     def receive_call(self, call):
         print("Elevator {}: gets the call-> {}, {} ".format(self.id, call.floor, call.type))
         self.to_visit.append(call)
-        self.to_visit.sort(key=lambda x: x[0])
+        #self.to_visit.sort(key=lambda x: x[0])
 
 
     def __getInputForCallD(self):
         a = input("You go to floor : ")
         try:
             a = int(a)
-            if a < self.max_floor and a > self.min_floor:
-                cond1 = self.direction == "UP" and a <= self.current_floor
-                cond2 = self.direction == "DOWN" and a >= self.current_floor
-                if cond1 or cond2:
-                    message = "Elevator going  {}  from {} and do not serve floor {}"
-                    raise ValueError(message.format(self.direction, self.current_floor, a))
+            if len(self.to_visit) > 2:
+                if a <= self.max_floor and a >= self.min_floor:
+                    cond1 = self.direction == "UP" and a <= self.current_floor
+                    cond2 = self.direction == "DOWN" and a >= self.current_floor
+                    if cond1 or cond2:
+                        message = "Elevator going  {}  from {} and do not serve floor {}"
+                        raise ValueError(message.format(self.direction, self.current_floor, a))
+                else:
+                    raise ValueError("number of floor not between {} and  {}".format(self.min_floor, self.max_floor))
             else:
-                raise ValueError("number of floor not between {} and  {}".format(self.min_floor, self.max_floor))
+                c = Call(a, "D", self.to_visit[0].direction)
         except Exception as e:
             print('wrong entry {}'.format(str(e)))
             print('-' * 20)
             return None
         else:
-            return Call(a, "D", self.direction)
-
+            c = Call(a, "D", self.direction)
+        return c
 
 class Plateform:
 
@@ -159,7 +165,7 @@ class Plateform:
                     direction = "DOWN"
                 elif a == min_floor:
                     direction = "UP"
-                elif a < max_floor and a > min_floor:
+                elif a <= max_floor and a >= min_floor:
                     direction = input("Indicate direction : ")
                     if direction != "UP" and direction != "DOWN":
                         raise ValueError("direction must be {} or {}".format("UP", "DOWN"))
@@ -182,10 +188,9 @@ if __name__ == "__main__":
     p = Plateform(4, 2, 0, 3)
     while True:
         c = Plateform.getInputForCallE(p.max_floor, p.min_floor)
-        if c:
+        if c is not None:
             p.receive_call(c)
-        else:
-            p.next()
+        p.next()
         print('-' * 20)
 
 
