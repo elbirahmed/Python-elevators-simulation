@@ -1,10 +1,43 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+    The elevators simulator module
+    =============================
+
+    Simulation of a platform handling elevators on a building.
+
+    .. module:: elevator.py
+
+    .. author:: Ahmed EL BIR <ahmed.elbyr@gmail.com>
+
+    Rules:
+    -----
+
+    The ``Platform`` handles ``nb_floor`` floor in a building with ``nb_elevator`` elevators
+    A Call for an elevator can be external of the elevator's cabin  (just the sens UP, DOWN) or internal
+    of the elevator's cabin to indicate the destination floor
+    The destination floor number of the internal call must be in the same sens of  the sens of the external call
+    An elevator handles only call that are within its same sens ("UP", "DOWN")
+    When there is no call to handle all  elevators must be in HOLD at the first floor waiting for calls
+
+
+"""
+
 from collections import namedtuple
 from enum import Enum, unique
+
+__author__ = "Ahmed EL BIR"
+__license__ = "GPL"
+__version__ = "0.0.2"
+__email__ = "ahmed.elbyr@gmail.com"
+
 
 Call = namedtuple("Call", "floor type direction")
 
 @unique
 class DirectionEnum(Enum):
+
     """
     this class is an enumeration for listing the direction that an elevator can take: UP or DOWN
     """
@@ -13,6 +46,7 @@ class DirectionEnum(Enum):
 
 @unique
 class StatusEnum(Enum):
+
     """
     this class is an enumeration for listing the status that an elevator can take: STOP, MOVE, HOLD
     """
@@ -21,18 +55,22 @@ class StatusEnum(Enum):
     HOLD = "HOLD"
     
 class StrategyChoice:
+
     """
     A class with only one function to define the strategy with wich a call will be affected to an elevator
     """
 
     def op_choice(self, elevators, call=None):
+
         """
         This function returns the elevator from a list of elevators to assing a call to it
         It is an abstract function to be impelmented in the classes that extends the StrategyChoice
 
         :param elevators: list of Elevator objects from which the function will get the most appropriate one to response to the call
         :param call: the call to search for the elevator to answer for it
+        :type call: ``Call``
         :return: the elevator to answer for the call
+        :rtype: ``Elevator``
         """
         pass
 
@@ -247,15 +285,17 @@ class Elevator:
                 print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
 
 
-class Plateform:
+class Platform:
+
     """
     the class that represents the entry point of the system
     it presents the building with elevators
     """
-    def __init__(self, nb_floor, nb_elevator, min_floor, max_floor, choice_strategy=StrategyChoiceNearest()):
+
+    def __init__(self, nb_floor: int, nb_elevator: int, min_floor: int, max_floor: int, choice_strategy: StrategyChoice = StrategyChoiceNearest()) -> StrategyChoice:
 
         """
-        the constructor of the Plateforme class
+        the constructor of the Plateform class
 
         :param nb_floor: the number of floors in the simulation
         :param nb_elevator: the number of elevators in the simulatio
@@ -271,6 +311,7 @@ class Plateform:
         self.choice_strategy = choice_strategy
 
     def receive_call(self, call):
+
         """
         method to receive a call, get the right elevator for it applying the proper strategy
         and affect it to it
@@ -282,6 +323,7 @@ class Plateform:
             elv.receive_call(call)
 
     def next(self):
+
         """
         method for simulation purposes
         :return: None
@@ -291,10 +333,12 @@ class Plateform:
 
 
 def get_external_call(max_floor, min_floor):
+
     """
     this method is used to get user input to simulate external calls for elevators
     :return: the call
     """
+
     try:
         a = input("Ask for an elevator from floor number: ")
         if a != "pass":
@@ -320,7 +364,7 @@ def get_external_call(max_floor, min_floor):
 
 
 if __name__ == "__main__":
-    p = Plateform(10, 4, 0, 10)
+    p = Platform(10, 4, 0, 10)
     while True:
         c = get_external_call(p.max_floor, p.min_floor)
         if c is not None:
