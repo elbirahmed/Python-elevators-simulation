@@ -22,3 +22,14 @@ An elevator handles only call that are within its same sens ("UP", "DOWN")
 
 When there is no call to handle, all  elevators must be in HOLD at the first floor waiting for calls
 
+Use:
+----
+
+The user will be asked to enter the floor from which he calls an elevator
+
+If the floor is != of last and first floor he is asked to indicate the direction "UP" or "DOWN"
+
+When the elevator reaches that floor , theuser is asked to indicate the destination floor
+
+With every iteration the previous scenario will run once more : the user can not ask for an elevator by
+typing "pass"
