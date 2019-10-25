@@ -224,8 +224,10 @@ class Elevator:
             call = self.to_visit[0]
             if call.floor < self.current_floor:
                 self.__move_down()
+                self.to_visit.sort(key=lambda x: x.floor, reverse=True)
             elif call.floor > self.current_floor:
                 self.__move_up()
+                self.to_visit.sort(key=lambda x: x.floor)
             else:
                 self.__open_door()
                 if call.type == "E":
@@ -234,6 +236,7 @@ class Elevator:
                         self.receive_call(c)
                 self.to_visit.pop(0)
                 self.__close_door()
+
         else:
             if self.current_floor != 0:
                 self.__move_down()
@@ -286,42 +289,40 @@ class Plateform:
         for elv in self.elevators:
             elv.next_action()
 
-    def getInputForCallE(cls):
-        """
-        this method is used to get user input to simulate external calls for elevators
-        :return: the call
-        """
-        try:
-            a = input("Ask for an elevator from floor number: ")
-            if a != "pass":
-                a = int(a)
-                if a == cls.max_floor:
-                    direction = DirectionEnum.DOWN.value
-                elif a == cls.min_floor:
-                    direction = DirectionEnum.UP.value
-                elif a <= cls.max_floor and a >= cls.min_floor:
-                    direction = input("Indicate direction : ")
-                    if direction != DirectionEnum.UP.value and direction != DirectionEnum.DOWN.value:
-                        raise ValueError("direction must be {} or {}".format(DirectionEnum.UP, DirectionEnum.DOWN))
-                else:
-                    raise ValueError("number of floor not between {} and  {}".format(cls.min_floor, cls.max_floor))
+
+def get_external_call(max_floor, min_floor):
+    """
+    this method is used to get user input to simulate external calls for elevators
+    :return: the call
+    """
+    try:
+        a = input("Ask for an elevator from floor number: ")
+        if a != "pass":
+            a = int(a)
+            if a == max_floor:
+                direction = DirectionEnum.DOWN.value
+            elif a == min_floor:
+                direction = DirectionEnum.UP.value
+            elif a <= max_floor and a >= min_floor:
+                direction = input("Indicate direction : ")
+                if direction != DirectionEnum.UP.value and direction != DirectionEnum.DOWN.value:
+                    raise ValueError("direction must be {} or {}".format(DirectionEnum.UP, DirectionEnum.DOWN))
             else:
-                return None
-        except Exception as e:
-            print('wrong entry {}'.format(str(e)))
-            print('-' * 20)
-            return None
+                raise ValueError("number of floor not between {} and  {}".format(min_floor, max_floor))
         else:
-            return Call(a, "E", direction)
-
-
+            return None
+    except Exception as e:
+        print('wrong entry {}'.format(str(e)))
+        print('-' * 20)
+        return None
+    else:
+        return Call(a, "E", direction)
 
 
 if __name__ == "__main__":
-
     p = Plateform(10, 4, 0, 10)
     while True:
-        c = p.getInputForCallE()
+        c = get_external_call(p.max_floor, p.min_floor)
         if c is not None:
             p.receive_call(c)
         p.next()
