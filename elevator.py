@@ -300,7 +300,28 @@ class Platform:
     it presents the building with elevators
     """
 
-    def __init__(self, nb_floor: int, nb_elevator: int, min_floor: int, max_floor: int, choice_strategy: StrategyChoice = StrategyChoiceNearest()) -> StrategyChoice:
+    def __new__(cls, nb_floor: int, nb_elevator: int, min_floor: int, max_floor: int,
+                choice_strategy: StrategyChoice = StrategyChoiceNearest()):
+
+        """
+
+        the constructor of the Plateform class
+
+        :param nb_floor: the number of floors in the simulation
+        :param nb_elevator: the number of elevators in the simulatio
+        :param min_floor: the number of the first floor
+        :param max_floor: the number of the last floor
+        :param choice_strategy: the strategy class to be used ( instances of StrategyChoice)
+        :return: The instance of the
+        """
+        if hasattr(cls, "__instance"):
+            return cls.__instance
+        else:
+            cls.__instance = super().__new__(cls)
+            return cls.__instance
+
+    def __init__(self, nb_floor: int, nb_elevator: int, min_floor: int, max_floor: int,
+                 choice_strategy: StrategyChoice = StrategyChoiceNearest()):
 
         """
         the constructor of the Plateform class
@@ -373,6 +394,9 @@ def get_external_call(max_floor, min_floor):
 
 if __name__ == "__main__":
     p = Platform(10, 4, 0, 10)
+    print (p.nb_floor)
+    p1 = Platform(11, 4, 0, 10)
+    print(p1.nb_floor)
     while True:
         c = get_external_call(p.max_floor, p.min_floor)
         if c is not None:
