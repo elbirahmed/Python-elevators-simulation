@@ -43,6 +43,7 @@ __email__ = "ahmed.elbyr@gmail.com"
 
 Call = namedtuple("Call", "floor type direction")
 
+
 @unique
 class DirectionEnum(Enum):
 
@@ -51,6 +52,7 @@ class DirectionEnum(Enum):
     """
     UP = "UP"
     DOWN = "DOWN"
+
 
 @unique
 class StatusEnum(Enum):
@@ -61,7 +63,8 @@ class StatusEnum(Enum):
     STOP = "STOP"
     MOVE = "MOVE"
     HOLD = "HOLD"
-    
+
+
 class StrategyChoice:
 
     """
@@ -74,7 +77,8 @@ class StrategyChoice:
         This function returns the elevator from a list of elevators to assing a call to it
         It is an abstract function to be impelmented in the classes that extends the StrategyChoice
 
-        :param elevators: list of Elevator objects from which the function will get the most appropriate one to response to the call
+        :param elevators: list of Elevator objects from which the function will get
+        the most appropriate one to response to the call
         :param call: the call to search for the elevator to answer for it
         :type call: ``Call``
         :return: the elevator to answer for the call
@@ -84,6 +88,7 @@ class StrategyChoice:
 
 
 class StrategyChoiceFree(StrategyChoice):
+
     """
     a class that extends the StrategyChoice to define a new strategy to get the elevator based only on availability
     """
@@ -106,12 +111,14 @@ class StrategyChoiceFree(StrategyChoice):
 
 
 class StrategyChoiceNearest(StrategyChoice):
+
     """
     a class that extends the StrategyChoice to define a new strategy to get the elevator based on the current position
     of  elevators and their direction
     """
 
     def op_choice(self, elevators, call=None):
+
         """
             This function returns the elevator from a list of elevators to assign a call to it
             is is a concrete implementation of the op_choice method of the StrategyChoice class
@@ -123,14 +130,17 @@ class StrategyChoiceNearest(StrategyChoice):
             :param call: the call to search for the elevator to answer for it
             :return: the elevator to answer for the call
         """
+
         free_elvs = [elv for elv in elevators if len(elv.to_visit) < elv.max_call]
         elv = None
         if free_elvs:
             elv = free_elvs[0]
             free_elvs_near = list(map(lambda x: (x, x.current_floor - call.floor), free_elvs))
+
             def filtre(x):
                 return x[0].direction == call.direction\
                        or (x[0].status == StatusEnum.HOLD.value)
+
             free_elvs_near = list(filter(filtre, free_elvs_near))
             m = abs(min(free_elvs_near, key=lambda x: abs(x[1]))[1])
             free_elvs_near = list(filter(lambda x: abs(x[1]) == m, free_elvs_near))
@@ -145,14 +155,15 @@ class Elevator:
     """
     Class that represents an Elevator
     """
-    def __init__(self, max_floor, min_floor, id, max_call=3):
+
+    def __init__(self, max_floor, min_floor, id_elv, max_call=3):
 
         """
         Constructor of the class Elevator
 
         :param max_floor: the highest floor an elevator can reach
         :param min_floor:  the lowest floor an elevator can reach
-        :param id:  the id of the elevator
+        :param id_elv:  the id_elv of the elevator
         :param max_call: the number of calls that an elevator can manage at one time
         """
 
@@ -161,7 +172,7 @@ class Elevator:
         self.max_floor = max_floor
         self.to_visit = []
         self.status = StatusEnum.HOLD.value
-        self.id = id
+        self.id_elv = id_elv
         self.max_call = max_call
         self.direction = DirectionEnum.UP.value
 
@@ -175,13 +186,13 @@ class Elevator:
         dest = self.current_floor + 1
         self.direction = DirectionEnum.UP.value
         self.status = StatusEnum.MOVE.value
-        print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
+        print("Elevator {}: current Position -> {}".format(self.id_elv, self.current_floor))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id_elv, self.status, self.direction))
         print("Moving from {} to {}".format(self.current_floor, dest))
         self.current_floor = dest
         if dest == self.max_floor:
             self.direction = DirectionEnum.DOWN.value
-        print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
+        print("Elevator {}: current Position -> {}".format(self.id_elv, self.current_floor))
 
     def __move_down(self):
 
@@ -193,11 +204,11 @@ class Elevator:
         dest = self.current_floor - 1
         self.direction = DirectionEnum.DOWN.value
         self.status = StatusEnum.MOVE.value
-        print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
+        print("Elevator {}: current Position -> {}".format(self.id_elv, self.current_floor))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id_elv, self.status, self.direction))
         print("moving from {} to {}".format(self.current_floor, dest))
         self.current_floor = dest
-        print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
+        print("Elevator {}: current Position -> {}".format(self.id_elv, self.current_floor))
 
     def __open_door(self):
 
@@ -207,9 +218,9 @@ class Elevator:
         """
 
         self.status = StatusEnum.STOP.value
-        print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
-        print("Elevator {}: open door ".format(self.id))
+        print("Elevator {}: current Position -> {}".format(self.id_elv, self.current_floor))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id_elv, self.status, self.direction))
+        print("Elevator {}: open door ".format(self.id_elv))
 
     def __close_door(self):
 
@@ -218,9 +229,9 @@ class Elevator:
             :return: None
         """
         self.status = StatusEnum.STOP.value
-        print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-        print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
-        print("Elevator {}: close door ".format(self.id))
+        print("Elevator {}: current Position -> {}".format(self.id_elv, self.current_floor))
+        print("Elevator {}: status -> {}, direction -> {}".format(self.id_elv, self.status, self.direction))
+        print("Elevator {}: close door ".format(self.id_elv))
 
     def receive_call(self, call):
         """
@@ -228,20 +239,23 @@ class Elevator:
         :param call: the call to manage by the elevator
         :return: None
         """
-        print("Elevator {}: gets the call-> {}, {} ".format(self.id, call.floor, call.type))
+        print("Elevator {}: gets the call-> {}, {} ".format(self.id_elv, call.floor, call.type))
         self.to_visit.append(call)
 
-    def __getInputForCallD(self):
+    def __get_input_for_call_d(self):
+
         """
         Method to simulate the dashboard in an elevator. For simulation purposes this method gets the internal calls
         of an user
         :return: None
         """
+
         a = input("You go to floor : ")
         try:
             a = int(a)
             if len(self.to_visit) > 2:
-                if a <= self.max_floor and a >= self.min_floor:
+                cond = self.min_floor <= a <= self.max_floor
+                if cond:
                     cond1 = self.direction == DirectionEnum.UP.value and a <= self.current_floor
                     cond2 = self.direction == DirectionEnum.DOWN.value and a >= self.current_floor
                     if cond1 or cond2:
@@ -250,14 +264,14 @@ class Elevator:
                 else:
                     raise ValueError("number of floor not between {} and  {}".format(self.min_floor, self.max_floor))
             else:
-                c = Call(a, "D", self.to_visit[0].direction)
+                ca = Call(a, "D", self.to_visit[0].direction)
         except Exception as e:
             print('wrong entry {}'.format(str(e)))
             print('-' * 20)
             return None
         else:
-            c = Call(a, "D", self.direction)
-        return c
+            ca = Call(a, "D", self.direction)
+        return ca
 
     def next_action(self):
 
@@ -266,6 +280,7 @@ class Elevator:
         (__close_door, __open_door, __move_down, __move_up, __getInputForCalD, receive_call)
         :return: None
         """
+
         if len(self.to_visit) > 0:
             call = self.to_visit[0]
             if call.floor < self.current_floor:
@@ -277,20 +292,19 @@ class Elevator:
             else:
                 self.__open_door()
                 if call.type == "E":
-                    c = self.__getInputForCallD()
-                    if c:
-                        self.receive_call(c)
+                    cal = self.__get_input_for_call_d()
+                    if cal:
+                        self.receive_call(cal)
                 self.to_visit.pop(0)
                 self.__close_door()
-
         else:
             if self.current_floor != 0:
                 self.__move_down()
             if self.current_floor == 0:
                 self.status = StatusEnum.HOLD.value
                 self.direction = DirectionEnum.UP.value
-                print("Elevator {}: current Position -> {}".format(self.id, self.current_floor))
-                print("Elevator {}: status -> {}, direction -> {}".format(self.id, self.status, self.direction))
+                print("Elevator {}: current Position -> {}".format(self.id_elv, self.current_floor))
+                print("Elevator {}: status -> {}, direction -> {}".format(self.id_elv, self.status, self.direction))
 
 
 class Platform:
@@ -314,7 +328,8 @@ class Platform:
         :param choice_strategy: the strategy class to be used ( instances of StrategyChoice)
         :return: The instance of the
         """
-        if hasattr(cls, "__instance"):
+
+        if hasattr(cls, "_{}__instance".format(cls.__name__)):
             return cls.__instance
         else:
             cls.__instance = super().__new__(cls)
@@ -324,7 +339,7 @@ class Platform:
                  choice_strategy: StrategyChoice = StrategyChoiceNearest()):
 
         """
-        the constructor of the Plateform class
+        the constructor of the Platform class
 
         :param nb_floor: the number of floors in the simulation
         :param nb_elevator: the number of elevators in the simulatio
@@ -332,6 +347,7 @@ class Platform:
         :param max_floor: the number of the last floor
         :param choice_strategy: the strategy class to be used ( instances of StrategyChoice)
         """
+
         self.nb_floor = nb_floor
         self.nb_elevator = nb_elevator
         self.min_floor = min_floor
@@ -357,6 +373,7 @@ class Platform:
         method for simulation purposes
         :return: None
         """
+
         for elv in self.elevators:
             elv.next_action()
 
@@ -376,7 +393,7 @@ def get_external_call(max_floor, min_floor):
                 direction = DirectionEnum.DOWN.value
             elif a == min_floor:
                 direction = DirectionEnum.UP.value
-            elif a <= max_floor and a >= min_floor:
+            elif min_floor <= a <= max_floor:
                 direction = input("Indicate direction : ")
                 if direction != DirectionEnum.UP.value and direction != DirectionEnum.DOWN.value:
                     raise ValueError("direction must be {} or {}".format(DirectionEnum.UP, DirectionEnum.DOWN))
@@ -394,15 +411,9 @@ def get_external_call(max_floor, min_floor):
 
 if __name__ == "__main__":
     p = Platform(10, 4, 0, 10)
-    print (p.nb_floor)
-    p1 = Platform(11, 4, 0, 10)
-    print(p1.nb_floor)
     while True:
         c = get_external_call(p.max_floor, p.min_floor)
         if c is not None:
             p.receive_call(c)
         p.next()
         print('-' * 20)
-
-
-9
