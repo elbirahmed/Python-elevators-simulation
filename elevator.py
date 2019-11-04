@@ -413,7 +413,7 @@ def get_external_call(max_floor, min_floor):
 
 
 if __name__ == "__main__":
-    
+
     p = Platform(10, 4, 0, 9)
     while True:
         c = get_external_call(p.max_floor, p.min_floor)
