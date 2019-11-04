@@ -34,6 +34,7 @@
 
 from collections import namedtuple
 from enum import Enum, unique
+from abc import ABC, abstractmethod
 
 __author__ = "Ahmed EL BIR"
 __license__ = "GPL"
@@ -65,12 +66,14 @@ class StatusEnum(Enum):
     HOLD = "HOLD"
 
 
-class StrategyChoice:
+class StrategyChoice(ABC):
 
     """
-    A class with only one function to define the strategy with wich a call will be affected to an elevator
+    An abstract base class with only one function to define the strategy with wich
+    a call will be affected to an elevator
     """
 
+    @abstractmethod
     def op_choice(self, elevators, call=None):
 
         """
@@ -410,7 +413,8 @@ def get_external_call(max_floor, min_floor):
 
 
 if __name__ == "__main__":
-    p = Platform(10, 4, 0, 10)
+    
+    p = Platform(10, 4, 0, 9)
     while True:
         c = get_external_call(p.max_floor, p.min_floor)
         if c is not None:
