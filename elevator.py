@@ -254,26 +254,17 @@ class Elevator:
         """
 
         a = input("You go to floor : ")
-        try:
-            a = int(a)
-            if len(self.to_visit) > 2:
-                cond = self.min_floor <= a <= self.max_floor
-                if cond:
-                    cond1 = self.direction == DirectionEnum.UP.value and a <= self.current_floor
-                    cond2 = self.direction == DirectionEnum.DOWN.value and a >= self.current_floor
-                    if cond1 or cond2:
-                        message = "Elevator going  {}  from {} and do not serve floor {}"
-                        raise ValueError(message.format(self.direction, self.current_floor, a))
-                else:
-                    raise ValueError("number of floor not between {} and  {}".format(self.min_floor, self.max_floor))
-            else:
-                ca = Call(a, "D", self.to_visit[0].direction)
-        except Exception as e:
-            print('wrong entry {}'.format(str(e)))
-            print('-' * 20)
-            return None
+        a = int(a)
+        cond = self.min_floor <= a <= self.max_floor
+        if cond:
+            cond1 = self.direction == DirectionEnum.UP.value and a <= self.current_floor
+            cond2 = self.direction == DirectionEnum.DOWN.value and a >= self.current_floor
+            if cond1 or cond2:
+                message = "Elevator going  {}  from {} and do not serve floor {}"
+                raise ValueError(message.format(self.direction, self.current_floor, a))
         else:
-            ca = Call(a, "D", self.direction)
+            raise ValueError("number of floor not between {} and  {}".format(self.min_floor, self.max_floor))
+        ca = Call(a, "D", self.to_visit[0].direction)
         return ca
 
     def next_action(self):
@@ -295,10 +286,14 @@ class Elevator:
             else:
                 self.__open_door()
                 if call.type == "E":
-                    cal = self.__get_input_for_call_d()
-                    if cal:
+                    try:
+                        cal = self.__get_input_for_call_d()
                         self.receive_call(cal)
+                    except ValueError as e:
+                        print(str(e))
+                        print('-' * 20)
                 self.to_visit.pop(0)
+                self.to_visit = [x for x in self.to_visit if x.type == "D" and x.floor == self.current_floor]
                 self.__close_door()
         else:
             if self.current_floor != 0:
